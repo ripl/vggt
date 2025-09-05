@@ -16,6 +16,16 @@ import glob
 import gc
 import time
 
+
+# Set up cache directories - model weights will go to /cache
+cache_dir = "/home/tianchongj/workspace/ProjectionPolicy/cache"
+os.environ["TORCH_HOME"] = cache_dir
+os.environ["HF_HOME"] = cache_dir
+os.environ["TRANSFORMERS_CACHE"] = cache_dir
+
+# Ensure cache directory exists
+os.makedirs(cache_dir, exist_ok=True)
+
 sys.path.append("vggt/")
 
 from visual_util import predictions_to_glb
@@ -26,12 +36,13 @@ from vggt.utils.geometry import unproject_depth_map_to_point_map
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
+print(f"Cache directory: {cache_dir}")
 print("Initializing and loading VGGT model...")
 # model = VGGT.from_pretrained("facebook/VGGT-1B")  # another way to load the model
 
 model = VGGT()
 _URL = "https://huggingface.co/facebook/VGGT-1B/resolve/main/model.pt"
-model.load_state_dict(torch.hub.load_state_dict_from_url(_URL))
+model.load_state_dict(torch.hub.load_state_dict_from_url(_URL, model_dir=cache_dir))
 
 
 model.eval()
